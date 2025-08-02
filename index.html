@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaos Configuration Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    :root {
+      --primary: #8a2be2;
+      --secondary: #4a3fe0;
+      --accent: #00bfff;
+      --dark-bg: #0f0c29;
+      --darker-bg: #0a0818;
+      --card-bg: rgba(18, 15, 40, 0.85);
+      --text: #e0e0ff;
+      --success: #28a745;
+      --warning: #ffc107;
+      --info: #17a2b8;
+      --danger: #dc3545;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--dark-bg), #302b63, #24243e);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Navigation Bar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(10, 8, 24, 0.95);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      border-bottom: 1px solid var(--secondary);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    
+    .site-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+    
+    .admin-link {
+      position: absolute;
+      right: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 1rem;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+    
+    .admin-link:hover {
+      opacity: 1;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 25px;
+    }
+    
+    .nav-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-links a:hover {
+      background: rgba(74, 63, 224, 0.3);
+      color: var(--accent);
+    }
+    
+    /* Main Container */
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 80px;
+    }
+    
+    /* Sign Up Box - Centered */
+    .signup-box {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 40px;
+      border: 1px solid var(--secondary);
+      box-shadow: 0 0 25px rgba(74, 63, 224, 0.3);
+      backdrop-filter: blur(10px);
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      animation: fadeIn 0.8s ease-out;
+    }
+    
+    .box-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 10px;
+    }
+    
+    .box-title i {
+      color: var(--accent);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--secondary);
+      background: rgba(30, 26, 60, 0.7);
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+    }
+    
+    input::placeholder {
+      color: #a0a0d0;
+    }
+    
+    .country-select {
+      position: relative;
+    }
+    
+    .country-flag {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+    }
+    
+    .country-select select {
+      padding-left: 50px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: white;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    button:hover {
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);
+    }
+    
+    button:after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    button:hover:after {
+      left: 100%;
+    }
+    
+    .message {
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 8px;
+      animation: slideIn 0.5s ease;
+    }
+    
+    .error {
+      background: rgba(220, 53, 69, 0.2);
+      color: var(--danger);
+    }
+    
+    .success {
+      background: rgba(40, 167, 69, 0.2);
+      color: var(--success);
+    }
+    
+    /* Glow effects */
+    .glow {
+      position: fixed;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 63, 224, 0.4) 0%, transparent 70%);
+      z-index: -1;
+      animation: pulse 4s infinite ease-in-out;
+    }
+    
+    .glow-1 {
+      top: 10%;
+      left: 10%;
+    }
+    
+    .glow-2 {
+      bottom: 10%;
+      right: 10%;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.4) 0%, transparent 70%);
+      animation-delay: 1s;
+    }
+    
+    .glow-3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(0, 191, 255, 0.3) 0%, transparent 70%);
+      width: 500px;
+      height: 500px;
+      animation-delay: 2s;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 0.7; }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 15px;
+      }
+      
+      .site-name {
+        font-size: 1.5rem;
+      }
+      
+      .signup-box {
+        padding: 30px 20px;
+        margin: 20px;
+      }
+      
+      .nav-links {
+        gap: 10px;
+      }
+      
+      .nav-links a {
+        padding: 6px 10px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="glow glow-3"></div>
+  
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="site-name">
+      <i class="fas fa-bolt"></i>
+      Chaos Nexus
+      <!-- Hidden admin link in the logo -->
+      <a href="admin.html" class="admin-link" id="adminLink" title="Admin Panel">
+        <i class="fas fa-user-shield"></i>
+      </a>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <!-- Will be populated by JavaScript -->
+    </div>
+  </nav>
+  
+  <!-- Main Content - Sign Up Box -->
+  <div class="main-container">
+    <div class="signup-box" id="signupBox">
+      <h2 class="box-title"><i class="fas fa-user-circle"></i> Create Account</h2>
+      
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter your username" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" placeholder="Enter your phone number" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="country">Country</label>
+        <div class="country-select">
+          <span class="country-flag fi fi-us"></span>
+          <select id="country" required>
+            <option value="" disabled selected>Select your country</option>
+            <option value="us">United States</option>
+            <option value="gb">United Kingdom</option>
+            <option value="ca">Canada</option>
+            <option value="au">Australia</option>
+            <option value="za">South Africa</option>
+            <option value="ng">Nigeria</option>
+            <option value="in">India</option>
+            <option value="br">Brazil</option>
+            <option value="de">Germany</option>
+            <option value="fr">France</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email (Optional)</label>
+        <input type="email" id="email" placeholder="Enter your email">
+      </div>
+      
+      <button id="signupBtn"><i class="fas fa-user-plus"></i> Create Account</button>
+      <div id="message" class="message"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs,
+      query,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDsoQkqUnTu9JilB4QHxA5P-FxWt49VDKI",
+      authDomain: "test-1-7482e.firebaseapp.com",
+      projectId: "test-1-7482e",
+      storageBucket: "test-1-7482e.firebasestorage.app",
+      messagingSenderId: "856651924036",
+      appId: "1:856651924036:web:2f2a3b69687d0ca042f211",
+      measurementId: "G-K2Y68NRZXN"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Country data with flag codes
+    const countries = {
+      "us": { name: "United States", flag: "us" },
+      "gb": { name: "United Kingdom", flag: "gb" },
+      "ca": { name: "Canada", flag: "ca" },
+      "au": { name: "Australia", flag: "au" },
+      "za": { name: "South Africa", flag: "za" },
+      "ng": { name: "Nigeria", flag: "ng" },
+      "in": { name: "India", flag: "in" },
+      "br": { name: "Brazil", flag: "br" },
+      "de": { name: "Germany", flag: "de" },
+      "fr": { name: "France", flag: "fr" }
+    };
+    
+    // Check if user is already signed in
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) {
+      // Hide signup box and show dashboard link
+      document.getElementById('signupBox').style.display = 'none';
+      document.getElementById('navLinks').innerHTML = `
+        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      `;
+      
+      // Show admin link only if user is admin
+      if (currentUser.isAdmin) {
+        document.getElementById('adminLink').style.display = 'block';
+      } else {
+        document.getElementById('adminLink').style.display = 'none';
+      }
+    } else {
+      // Show signup navigation
+      document.getElementById('navLinks').innerHTML = `
+        <a href="#" id="signupNavLink" class="active"><i class="fas fa-user-plus"></i> Sign Up</a>
+      `;
+      document.getElementById('adminLink').style.display = 'none';
+    }
+    
+    // Update flag when country changes
+    document.getElementById('country').addEventListener('change', function() {
+      const flagElement = document.querySelector('.country-flag');
+      const selectedCountry = this.value;
+      flagElement.className = `country-flag fi fi-${selectedCountry}`;
+    });
+    
+    // Sign Up functionality
+    document.getElementById('signupBtn').addEventListener('click', async function() {
+      const username = document.getElementById("username").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const country = document.getElementById("country").value;
+      const email = document.getElementById("email").value.trim();
+      const messageEl = document.getElementById('message');
+      
+      // Validation
+      if (!username || !phone || !country) {
+        messageEl.textContent = "Please fill in all required fields.";
+        messageEl.className = "message error";
+        return;
+      }
+      
+      if (!/^\d{10,15}$/.test(phone)) {
+        messageEl.textContent = "Please enter a valid phone number (10-15 digits).";
+        messageEl.className = "message error";
+        return;
+      }
+      
+      try {
+        // Check if username exists in Firebase
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("username", "==", username));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          messageEl.textContent = "Username already exists. Please choose another.";
+          messageEl.className = "message error";
+          return;
+        }
+        
+        // Create user object
+        const userData = { 
+          username, 
+          phone, 
+          country, 
+          countryName: countries[country]?.name || "Unknown",
+          email: email || null,
+          joinDate: new Date().toISOString(),
+          downloads: 0,
+          isAdmin: false
+        };
+        
+        // Save user to Firebase
+        const docRef = await addDoc(collection(db, "users"), userData);
+        
+        // Add ID to user data
+        userData.id = docRef.id;
+        
+        // Check if this is the first user (make admin)
+        const allUsers = await getDocs(collection(db, "users"));
+        if (allUsers.size === 1) {
+          userData.isAdmin = true;
+          // Update user to admin in Firebase
+          // Note: In a real app, you would update the document here
+          // For simplicity, we'll just set it in localStorage
+        }
+        
+        // Save to localStorage
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        
+        // Show success message
+        messageEl.textContent = "Account created successfully! Redirecting...";
+        messageEl.className = "message success";
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        messageEl.textContent = "Error creating account. Please try again.";
+        messageEl.className = "message error";
+      }
+    });
+  </script>
+</body>
+</html>
