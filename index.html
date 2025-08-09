@@ -381,11 +381,8 @@
     </div>
   </div>
 
-  <!-- Firebase SDK -->
-  <script type="module">
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  // Replace with your Supabase credentials
   const SUPABASE_URL = "https://wsnjqxsnqlaqzlqcbiro.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzbmpxeHNucWxhcXpscWNiaXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mjg3MDUsImV4cCI6MjA3MDMwNDcwNX0.xDIwY3nkJ2cmdHeswavleB6LkQdTglLjAN4EwxOcRzA";
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -422,9 +419,9 @@
       return;
     }
 
-    // Check if username exists in Supabase
+    // Check if username exists
     const { data: existingUser, error: checkError } = await client
-      .from("users") // your table name
+      .from("users")
       .select("username")
       .eq("username", username);
 
@@ -440,7 +437,7 @@
       return;
     }
 
-    // Create new user
+    // Insert new user
     const userData = {
       username,
       phone,
@@ -453,41 +450,40 @@
     };
 
     const { data, error } = await client
-      .from("users") // your table name
+      .from("users")
       .insert([userData])
       .select();
 
     if (error) {
-      console.error(error);
       messageEl.textContent = "Error creating account.";
       messageEl.className = "message error";
       return;
     }
 
-    // First user becomes admin
+    // Count users to check first user
     const { count } = await client
       .from("users")
       .select("*", { count: "exact" });
 
     if (count === 1) {
       userData.isAdmin = true;
+      // In real app update user with isAdmin true
     }
 
     localStorage.setItem('currentUser', JSON.stringify(userData));
 
     messageEl.textContent = "Account created successfully! Redirecting...";
     messageEl.className = "message success";
-    setTimeout(() => {
-      window.location.href = "dashboard.html";
-    }, 1500);
+    setTimeout(() => window.location.href = "dashboard.html", 1500);
   });
 
-  // Update flag when country changes
+  // Update flag icon on country change
   document.getElementById('country').addEventListener('change', function() {
     const flagElement = document.querySelector('.country-flag');
     flagElement.className = `country-flag fi fi-${this.value}`;
   });
 </script>
+
 
 </body>
 </html>
