@@ -381,38 +381,42 @@
     </div>
   </div>
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 <script>
+  // Your Supabase credentials
   const SUPABASE_URL = "https://wsnjqxsnqlaqzlqcbiro.supabase.co";
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzbmpxeHNucWxhcXpscWNiaXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mjg3MDUsImV4cCI6MjA3MDMwNDcwNX0.xDIwY3nkJ2cmdHeswavleB6LkQdTglLjAN4EwxOcRzA";
-  const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const countries = {
-    "us": { name: "United States", flag: "us" },
-    "gb": { name: "United Kingdom", flag: "gb" },
-    "ca": { name: "Canada", flag: "ca" },
-    "au": { name: "Australia", flag: "au" },
-    "za": { name: "South Africa", flag: "za" },
-    "ng": { name: "Nigeria", flag: "ng" },
-    "in": { name: "India", flag: "in" },
-    "br": { name: "Brazil", flag: "br" },
-    "de": { name: "Germany", flag: "de" },
-    "fr": { name: "France", flag: "fr" }
+    us: { name: "United States", flag: "us" },
+    gb: { name: "United Kingdom", flag: "gb" },
+    ca: { name: "Canada", flag: "ca" },
+    au: { name: "Australia", flag: "au" },
+    za: { name: "South Africa", flag: "za" },
+    ng: { name: "Nigeria", flag: "ng" },
+    in: { name: "India", flag: "in" },
+    br: { name: "Brazil", flag: "br" },
+    de: { name: "Germany", flag: "de" },
+    fr: { name: "France", flag: "fr" }
   };
 
-  document.getElementById('signupBtn').addEventListener('click', async function() {
+  document.getElementById('signupBtn').addEventListener('click', async () => {
     const username = document.getElementById("username").value.trim();
     const phone = document.getElementById("phone").value.trim();
     const country = document.getElementById("country").value;
     const email = document.getElementById("email").value.trim();
     const messageEl = document.getElementById('message');
 
+    // Validate required fields
     if (!username || !phone || !country) {
       messageEl.textContent = "Please fill in all required fields.";
       messageEl.className = "message error";
       return;
     }
 
+    // Validate phone (only digits, length 10-15)
     if (!/^\d{10,15}$/.test(phone)) {
       messageEl.textContent = "Please enter a valid phone number.";
       messageEl.className = "message error";
@@ -420,7 +424,7 @@
     }
 
     // Check if username exists
-    const { data: existingUser, error: checkError } = await client
+    const { data: existingUser, error: checkError } = await supabase
       .from("users")
       .select("username")
       .eq("username", username);
@@ -437,7 +441,7 @@
       return;
     }
 
-    // Insert new user
+    // Prepare user data
     const userData = {
       username,
       phone,
@@ -449,36 +453,46 @@
       isAdmin: false
     };
 
-    const { data, error } = await client
+    // Insert new user
+    const { data, error } = await supabase
       .from("users")
       .insert([userData])
       .select();
 
     if (error) {
+      console.error(error);
       messageEl.textContent = "Error creating account.";
       messageEl.className = "message error";
       return;
     }
 
-    // Count users to check first user
-    const { count } = await client
+    // Check total users to assign admin role to first user
+    const { count } = await supabase
       .from("users")
-      .select("*", { count: "exact" });
+      .select("*", { count: "exact", head: true });
 
     if (count === 1) {
+      // Update the inserted user as admin
+      await supabase
+        .from("users")
+        .update({ isAdmin: true })
+        .eq("username", username);
       userData.isAdmin = true;
-      // In real app update user with isAdmin true
     }
 
+    // Save user data locally
     localStorage.setItem('currentUser', JSON.stringify(userData));
 
     messageEl.textContent = "Account created successfully! Redirecting...";
     messageEl.className = "message success";
-    setTimeout(() => window.location.href = "dashboard.html", 1500);
+
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
   });
 
-  // Update flag icon on country change
-  document.getElementById('country').addEventListener('change', function() {
+  // Change country flag when select changes
+  document.getElementById('country').addEventListener('change', function () {
     const flagElement = document.querySelector('.country-flag');
     flagElement.className = `country-flag fi fi-${this.value}`;
   });
