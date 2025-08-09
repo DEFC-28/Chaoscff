@@ -383,153 +383,111 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { 
-      getFirestore, 
-      collection, 
-      addDoc, 
-      getDocs,
-      query,
-      where
-    } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-    
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDsoQkqUnTu9JilB4QHxA5P-FxWt49VDKI",
-      authDomain: "test-1-7482e.firebaseapp.com",
-      projectId: "test-1-7482e",
-      storageBucket: "test-1-7482e.firebasestorage.app",
-      messagingSenderId: "856651924036",
-      appId: "1:856651924036:web:2f2a3b69687d0ca042f211",
-      measurementId: "G-K2Y68NRZXN"
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  // Replace with your Supabase credentials
+  const SUPABASE_URL = "https://wsnjqxsnqlaqzlqcbiro.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzbmpxeHNucWxhcXpscWNiaXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3Mjg3MDUsImV4cCI6MjA3MDMwNDcwNX0.xDIwY3nkJ2cmdHeswavleB6LkQdTglLjAN4EwxOcRzA";
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const countries = {
+    "us": { name: "United States", flag: "us" },
+    "gb": { name: "United Kingdom", flag: "gb" },
+    "ca": { name: "Canada", flag: "ca" },
+    "au": { name: "Australia", flag: "au" },
+    "za": { name: "South Africa", flag: "za" },
+    "ng": { name: "Nigeria", flag: "ng" },
+    "in": { name: "India", flag: "in" },
+    "br": { name: "Brazil", flag: "br" },
+    "de": { name: "Germany", flag: "de" },
+    "fr": { name: "France", flag: "fr" }
+  };
+
+  document.getElementById('signupBtn').addEventListener('click', async function() {
+    const username = document.getElementById("username").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const country = document.getElementById("country").value;
+    const email = document.getElementById("email").value.trim();
+    const messageEl = document.getElementById('message');
+
+    if (!username || !phone || !country) {
+      messageEl.textContent = "Please fill in all required fields.";
+      messageEl.className = "message error";
+      return;
+    }
+
+    if (!/^\d{10,15}$/.test(phone)) {
+      messageEl.textContent = "Please enter a valid phone number.";
+      messageEl.className = "message error";
+      return;
+    }
+
+    // Check if username exists in Supabase
+    const { data: existingUser, error: checkError } = await client
+      .from("users") // your table name
+      .select("username")
+      .eq("username", username);
+
+    if (checkError) {
+      messageEl.textContent = "Error checking username.";
+      messageEl.className = "message error";
+      return;
+    }
+
+    if (existingUser.length > 0) {
+      messageEl.textContent = "Username already exists. Please choose another.";
+      messageEl.className = "message error";
+      return;
+    }
+
+    // Create new user
+    const userData = {
+      username,
+      phone,
+      country,
+      countryName: countries[country]?.name || "Unknown",
+      email: email || null,
+      joinDate: new Date().toISOString(),
+      downloads: 0,
+      isAdmin: false
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    
-    // Country data with flag codes
-    const countries = {
-      "us": { name: "United States", flag: "us" },
-      "gb": { name: "United Kingdom", flag: "gb" },
-      "ca": { name: "Canada", flag: "ca" },
-      "au": { name: "Australia", flag: "au" },
-      "za": { name: "South Africa", flag: "za" },
-      "ng": { name: "Nigeria", flag: "ng" },
-      "in": { name: "India", flag: "in" },
-      "br": { name: "Brazil", flag: "br" },
-      "de": { name: "Germany", flag: "de" },
-      "fr": { name: "France", flag: "fr" }
-    };
-    
-    // Check if user is already signed in
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
-      // Hide signup box and show dashboard link
-      document.getElementById('signupBox').style.display = 'none';
-      document.getElementById('navLinks').innerHTML = `
-        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-      `;
-      
-      // Show admin link only if user is admin
-      if (currentUser.isAdmin) {
-        document.getElementById('adminLink').style.display = 'block';
-      } else {
-        document.getElementById('adminLink').style.display = 'none';
-      }
-    } else {
-      // Show signup navigation
-      document.getElementById('navLinks').innerHTML = `
-        <a href="#" id="signupNavLink" class="active"><i class="fas fa-user-plus"></i> Sign Up</a>
-      `;
-      document.getElementById('adminLink').style.display = 'none';
+    const { data, error } = await client
+      .from("users") // your table name
+      .insert([userData])
+      .select();
+
+    if (error) {
+      console.error(error);
+      messageEl.textContent = "Error creating account.";
+      messageEl.className = "message error";
+      return;
     }
-    
-    // Update flag when country changes
-    document.getElementById('country').addEventListener('change', function() {
-      const flagElement = document.querySelector('.country-flag');
-      const selectedCountry = this.value;
-      flagElement.className = `country-flag fi fi-${selectedCountry}`;
-    });
-    
-    // Sign Up functionality
-    document.getElementById('signupBtn').addEventListener('click', async function() {
-      const username = document.getElementById("username").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const country = document.getElementById("country").value;
-      const email = document.getElementById("email").value.trim();
-      const messageEl = document.getElementById('message');
-      
-      // Validation
-      if (!username || !phone || !country) {
-        messageEl.textContent = "Please fill in all required fields.";
-        messageEl.className = "message error";
-        return;
-      }
-      
-      if (!/^\d{10,15}$/.test(phone)) {
-        messageEl.textContent = "Please enter a valid phone number (10-15 digits).";
-        messageEl.className = "message error";
-        return;
-      }
-      
-      try {
-        // Check if username exists in Firebase
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("username", "==", username));
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          messageEl.textContent = "Username already exists. Please choose another.";
-          messageEl.className = "message error";
-          return;
-        }
-        
-        // Create user object
-        const userData = { 
-          username, 
-          phone, 
-          country, 
-          countryName: countries[country]?.name || "Unknown",
-          email: email || null,
-          joinDate: new Date().toISOString(),
-          downloads: 0,
-          isAdmin: false
-        };
-        
-        // Save user to Firebase
-        const docRef = await addDoc(collection(db, "users"), userData);
-        
-        // Add ID to user data
-        userData.id = docRef.id;
-        
-        // Check if this is the first user (make admin)
-        const allUsers = await getDocs(collection(db, "users"));
-        if (allUsers.size === 1) {
-          userData.isAdmin = true;
-          // Update user to admin in Firebase
-          // Note: In a real app, you would update the document here
-          // For simplicity, we'll just set it in localStorage
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        
-        // Show success message
-        messageEl.textContent = "Account created successfully! Redirecting...";
-        messageEl.className = "message success";
-        
-        // Redirect to dashboard
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 1500);
-      } catch (error) {
-        console.error("Error adding document: ", error);
-        messageEl.textContent = "Error creating account. Please try again.";
-        messageEl.className = "message error";
-      }
-    });
-  </script>
+
+    // First user becomes admin
+    const { count } = await client
+      .from("users")
+      .select("*", { count: "exact" });
+
+    if (count === 1) {
+      userData.isAdmin = true;
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+
+    messageEl.textContent = "Account created successfully! Redirecting...";
+    messageEl.className = "message success";
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
+  });
+
+  // Update flag when country changes
+  document.getElementById('country').addEventListener('change', function() {
+    const flagElement = document.querySelector('.country-flag');
+    flagElement.className = `country-flag fi fi-${this.value}`;
+  });
+</script>
+
 </body>
 </html>
